@@ -14,21 +14,36 @@ public class Program
     static async Task Main(string[] args)
     {
         // Refresh Token from PostMan
-        var refToken = "eyJzdiI6IjAwMDAwMSIsImFsZyI6IkhTNTEyIiwidiI6IjIuMCIsImtpZCI6IjU4OTk1MzNiLTZhYjAtNDNlYi1hNjQxLTUyMGQ0MzMxODM4ZiJ9.eyJ2ZXIiOjksImF1aWQiOiJiZmEwMDEwNTQxZWJmMGJmYTdhNGVmYTcxM2ZmZjI0NCIsImNvZGUiOiI1dFI3YU5iWmlsazV6VDFWNGNIVG5HYWtTb0NtQldwQWciLCJpc3MiOiJ6bTpjaWQ6WEZPVExUcWVSMXlyeDJaV2RNZHp3IiwiZ25vIjowLCJ0eXBlIjoxLCJ0aWQiOjAsImF1ZCI6Imh0dHBzOi8vb2F1dGguem9vbS51cyIsInVpZCI6InM0MnpTVTBjU2lhWGdNay1lUjVXNWciLCJuYmYiOjE2ODkyNzQ0NTcsImV4cCI6MTY5NzA1MDQ1NywiaWF0IjoxNjg5Mjc0NDU3LCJhaWQiOiJSTnZoZkJIZlI4S2V5cXBGQUNKR0FRIn0.i4eBgzmpFD6h4xMNeZPgJAH6Tcvm3jP-9uJQHeQcwVd470sXzFCuIX1ARWgwPVKKCX3OhEh2f1NVGWTZW";
+        var refToken = "eyJzdiI6IjAwMDAwMSIsImFsZyI6IkhTNTEyIiwidiI6IjIuMCIsImtpZCI6IjU4OTk1MzNiLTZhYjAtNDNlYi1hNjQxLTUyMGQ0MzMxODM4ZiJ9.eyJ2ZXIiOjksImF1aWQiOiJiZmEwMDEwNTQxZWJmMGJmYTdhNGVmYTcxM2ZmZjI0NCIsImNvZGUiOiI1dFI3YU5iWmlsazV6VDFWNGNIVG5HYWtTb0NtQldwQWciLCJpc3MiOiJ6bTpjaWQ6WEZPVExUcWVSMXlyeDJaV2RNZHp3IiwiZ25vIjowLCJ0eXBlIjoxLCJ0aWQiOjAsImF1ZCI6Imh0dHBzOi8vb2F1dGguem9vbS51cyIsInVpZCI6InM0MnpTVTBjU2lhWGdNay1lUjVXNWciLCJuYmYiOjE2ODkyNzQ0NTcsImV4cCI6MTY5NzA1MDQ1NywiaWF0IjoxNjg5Mjc0NDU3LCJhaWQiOiJSTnZoZkJIZlI4S2V5cXBGQUNKR0FRIn0.i4eBgzmpFD6h4xMNeZPgJAH6Tcvm3jP-9uJQHeQcwVd470sXzFCuIX1ARWgwPVKKCX3OhEh2f1NVGWTZWodqhQ";
         // Client ID from Zoom App Management Tab
-        var cID = "XFOTLTqeR1yrx2ZW";
+        var cID = "XFOTLTqeR1yrx2ZWdMdzw";
         // Client Secret from Zoom App Management Tab
-        var cSecret = "79scsCkvrCvNOQyZ3Gb8jRUKy";
+        var cSecret = "79scsCkvrCvNOQyZ3Gb8jRUKypdJ3Uk5";
 
         var testRefToken = string.Empty;
-
+        /*
         var meetingTopic = "Customized topic";
         string meetingPassword = "joshua";
         var meetingStart = "2024-04-02T15:59:00Z";
         int meetingDuration = 60;
+        */
+
+        Console.WriteLine("Enter topic for meeting: ");
+        var meetingTopic = Console.ReadLine();
+
+        Console.WriteLine("Enter meeting password: ");
+        string meetingPassword = Console.ReadLine();
+
+        Console.WriteLine("Enter start time in this format (YYYY-MM-DDTHH:MM:SSZ): ");
+        var meetingStart = Console.ReadLine();
+
+        Console.WriteLine("Enter meeting duration: ");
+        string durationTemp = Console.ReadLine();
+        int meetingDuration = Convert.ToInt32(durationTemp);
+
 
         // Checks if password is proper length
-        if(meetingPassword.Length > 10)
+        if (meetingPassword.Length > 10)
         {
             Console.Write("Password cannot have more than 10 characters, please try again!");
             Environment.Exit(0);
@@ -143,7 +158,7 @@ public class Program
                         Console.WriteLine("The 'join_url' was not found in the response");
                     }
 
-                   
+                    
                 }
                 else
                 {
@@ -159,7 +174,7 @@ public class Program
 
         return Tuple.Create(joinZoom, startZoom);
     }
-   
+    
     // Method to automatically grab the access token, no need to manually change it
     static async Task<string> RefreshAccessTokenAsync(string refreshToken, string clientId, string clientSecret)
     {
@@ -194,12 +209,12 @@ public class Program
                 throw new Exception("Failed to refresh token");
             }
         }
- 
+  
     }
 }
 
 public class TokenResponse
-{
+{ 
     public string access_token { get; set; }
     public string refresh_token { get; set;}
     public string token_type { get; set;}
@@ -207,4 +222,6 @@ public class TokenResponse
     public string scope { get; set; }
 
 }
+
+
 
