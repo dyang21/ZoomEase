@@ -28,6 +28,7 @@ public class Program
         int meetingDuration = 60;
         */
 
+        // Gets parameters from user
         Console.WriteLine("Enter topic for meeting: ");
         var meetingTopic = Console.ReadLine();
 
@@ -65,12 +66,15 @@ public class Program
         Tuple<string, string> testResult = await PostMeetings(testRefToken, meetingTopic, meetingPassword, meetingStart, meetingDuration);
         string joinURL = testResult.Item1;
         string startURL = testResult.Item2;
-
+        
+        // Ouputs the meeting links
         Console.WriteLine("join URL is: " + joinURL);
         Console.WriteLine("start URL is: " + startURL);
 
     }
 
+
+    // Just a method to test the HTTP request and other testing
     static async Task<string> GetMeetings(string refToken)
     {
         string accessToken = refToken;
@@ -98,6 +102,7 @@ public class Program
         return responseString;
     }
 
+    // Main method that returns two variables, one meeting link for guest and one meeting link for host
     static async Task<Tuple<string, string>> PostMeetings(string token, string top, string pass, string start, int dur)
     {
 
@@ -108,7 +113,7 @@ public class Program
         var startZoom = string.Empty;
         var date = string.Empty;
 
-
+        // Makes use of "using" in order to properly dispose of data/memory
         using (var client = new HttpClient())
         {
             HttpRequestMessage request = new HttpRequestMessage();
@@ -120,6 +125,7 @@ public class Program
             {
                 var meetings = new
                 {
+                    // Changing the meeting properties based off of the parameters passed by the user in the main
                     topic = top,
                     type = 2,
                     start_time = start,
@@ -136,6 +142,7 @@ public class Program
                 // Get the join_url
                 if(response.IsSuccessStatusCode)
                 {
+                    // Converting the date time format to a proper format in order to check that the date time is valid 
                     var jsonResponse = JsonConvert.DeserializeObject<Dictionary<string, object>>(respString);
                     date = jsonResponse["start_time"].ToString();
                     DateTime dateTime = DateTime.Parse(start, CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal);
