@@ -47,7 +47,7 @@ public class Program
             Environment.Exit(0);
         }
 
-        string testRefToken = await RefreshAccessTokenAsync(refToken, cID, cSecret);
+        testRefToken = await RefreshAccessTokenAsync(refToken, cID, cSecret);
         await GetMeetings(testRefToken);
         Tuple<string, string> testResult = await PostMeetings(testRefToken, meetingTopic, meetingPassword, meetingStart, meetingDuration);
 
@@ -64,8 +64,6 @@ public class Program
         string accessToken = refToken;
 
         string responseString = string.Empty;
-
-        using (var client = new HttpClient())
 
         using (var client = new HttpClient())
         {
