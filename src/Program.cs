@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Net.Http;
 using System.Runtime.ConstrainedExecution;
@@ -6,29 +7,18 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
-using static System.Net.WebRequestMethods;
 
 public class Program
 {
     static readonly HttpClient client = new HttpClient();
     static async Task Main(string[] args)
     {
-        // Refresh Token from PostMan
         var refToken = "eyJzdiI6IjAwMDAwMSIsImFsZyI6IkhTNTEyIiwidiI6IjIuMCIsImtpZCI6IjU4OTk1MzNiLTZhYjAtNDNlYi1hNjQxLTUyMGQ0MzMxODM4ZiJ9.eyJ2ZXIiOjksImF1aWQiOiJiZmEwMDEwNTQxZWJmMGJmYTdhNGVmYTcxM2ZmZjI0NCIsImNvZGUiOiI1dFI3YU5iWmlsazV6VDFWNGNIVG5HYWtTb0NtQldwQWciLCJpc3MiOiJ6bTpjaWQ6WEZPVExUcWVSMXlyeDJaV2RNZHp3IiwiZ25vIjowLCJ0eXBlIjoxLCJ0aWQiOjAsImF1ZCI6Imh0dHBzOi8vb2F1dGguem9vbS51cyIsInVpZCI6InM0MnpTVTBjU2lhWGdNay1lUjVXNWciLCJuYmYiOjE2ODkyNzQ0NTcsImV4cCI6MTY5NzA1MDQ1NywiaWF0IjoxNjg5Mjc0NDU3LCJhaWQiOiJSTnZoZkJIZlI4S2V5cXBGQUNKR0FRIn0.i4eBgzmpFD6h4xMNeZPgJAH6Tcvm3jP-9uJQHeQcwVd470sXzFCuIX1ARWgwPVKKCX3OhEh2f1NVGWTZWodqhQ";
-        // Client ID from Zoom App Management Tab
         var cID = "XFOTLTqeR1yrx2ZWdMdzw";
-        // Client Secret from Zoom App Management Tab
         var cSecret = "79scsCkvrCvNOQyZ3Gb8jRUKypdJ3Uk5";
 
         var testRefToken = string.Empty;
-        /*
-        var meetingTopic = "Customized topic";
-        string meetingPassword = "joshua";
-        var meetingStart = "2024-04-02T15:59:00Z";
-        int meetingDuration = 60;
-        */
 
-        // Gets parameters from user
         Console.WriteLine("Enter topic for meeting: ");
         var meetingTopic = Console.ReadLine();
 
@@ -43,14 +33,12 @@ public class Program
         int meetingDuration = Convert.ToInt32(durationTemp);
 
 
-        // Checks if password is proper length
         if (meetingPassword.Length > 10)
         {
             Console.Write("Password cannot have more than 10 characters, please try again!");
             Environment.Exit(0);
         }
 
-        // Checks if start time is properlly formatted
         string pattern = @"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z";
 
         if(!Regex.IsMatch(meetingStart, pattern))
@@ -59,28 +47,25 @@ public class Program
             Environment.Exit(0);
         }
 
-
-        // Gets access token first
-        testRefToken = await RefreshAccessTokenAsync(refToken, cID, cSecret);
+        string testRefToken = await RefreshAccessTokenAsync(refToken, cID, cSecret);
         await GetMeetings(testRefToken);
         Tuple<string, string> testResult = await PostMeetings(testRefToken, meetingTopic, meetingPassword, meetingStart, meetingDuration);
+
         string joinURL = testResult.Item1;
         string startURL = testResult.Item2;
         
-        // Ouputs the meeting links
         Console.WriteLine("join URL is: " + joinURL);
         Console.WriteLine("start URL is: " + startURL);
 
     }
 
-
-    // Just a method to test the HTTP request and other testing
     static async Task<string> GetMeetings(string refToken)
     {
         string accessToken = refToken;
 
-        // Empty place holder for return value
         string responseString = string.Empty;
+
+        using (var client = new HttpClient())
 
         using (var client = new HttpClient())
         {
@@ -96,13 +81,13 @@ public class Program
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
+                Console.WriteLine("Error while getting meetings: " + e);
             }
         }
         return responseString;
     }
 
-    // Main method that returns two variables, one meeting link for guest and one meeting link for host
+
     static async Task<Tuple<string, string>> PostMeetings(string token, string top, string pass, string start, int dur)
     {
 
@@ -113,7 +98,6 @@ public class Program
         var startZoom = string.Empty;
         var date = string.Empty;
 
-        // Makes use of "using" in order to properly dispose of data/memory
         using (var client = new HttpClient())
         {
             HttpRequestMessage request = new HttpRequestMessage();
@@ -125,7 +109,6 @@ public class Program
             {
                 var meetings = new
                 {
-                    // Changing the meeting properties based off of the parameters passed by the user in the main
                     topic = top,
                     type = 2,
                     start_time = start,
@@ -139,10 +122,8 @@ public class Program
                 HttpResponseMessage response = await client.SendAsync(request);
                 respString = await response.Content.ReadAsStringAsync();
 
-                // Get the join_url
                 if(response.IsSuccessStatusCode)
                 {
-                    // Converting the date time format to a proper format in order to check that the date time is valid 
                     var jsonResponse = JsonConvert.DeserializeObject<Dictionary<string, object>>(respString);
                     date = jsonResponse["start_time"].ToString();
                     DateTime dateTime = DateTime.Parse(start, CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal);
@@ -175,14 +156,13 @@ public class Program
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
+                Console.WriteLine("Error while posting meetings: " + e);
             }
         }
 
         return Tuple.Create(joinZoom, startZoom);
     }
-    
-    // Method to automatically grab the access token, no need to manually change it
+
     static async Task<string> RefreshAccessTokenAsync(string refreshToken, string clientId, string clientSecret)
     {
         using (var client = new HttpClient())
@@ -220,6 +200,7 @@ public class Program
     }
 }
 
+
 public class TokenResponse
 { 
     public string access_token { get; set; }
@@ -229,6 +210,3 @@ public class TokenResponse
     public string scope { get; set; }
 
 }
-
-
-
