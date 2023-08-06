@@ -74,7 +74,6 @@ Scalability:
 Deployment:
 ---------------
 - Comand-line tool
-- 
 
 Note:
 -----
