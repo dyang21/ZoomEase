@@ -41,7 +41,7 @@ public class Program
 
         string pattern = @"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z";
 
-        if(!Regex.IsMatch(meetingStart, pattern))
+        if (!Regex.IsMatch(meetingStart, pattern))
         {
             Console.WriteLine("Invalid format of start time please use this format (YYYY-MM-DDTHH:MM:SSZ)");
             Environment.Exit(0);
@@ -53,7 +53,7 @@ public class Program
 
         string joinURL = testResult.Item1;
         string startURL = testResult.Item2;
-        
+
         Console.WriteLine("join URL is: " + joinURL);
         Console.WriteLine("start URL is: " + startURL);
 
@@ -103,8 +103,7 @@ public class Program
             request.Method = HttpMethod.Post;
             request.Headers.Add("Authorization", $"Bearer {accessToken}");
 
-            try
-            {
+         
                 var meetings = new
                 {
                     topic = top,
@@ -120,44 +119,35 @@ public class Program
                 HttpResponseMessage response = await client.SendAsync(request);
                 respString = await response.Content.ReadAsStringAsync();
 
-                if(response.IsSuccessStatusCode)
+            if (response.IsSuccessStatusCode)
+            {
+                var jsonResponse = JsonConvert.DeserializeObject<Dictionary<string, object>>(respString);
+                date = jsonResponse["start_time"].ToString();
+                DateTime dateTime = DateTime.Parse(start, CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal);
+                string newFormat = dateTime.ToString("M/d/yyyy h:mm:ss tt");
+
+                if (date != newFormat)
                 {
-                    var jsonResponse = JsonConvert.DeserializeObject<Dictionary<string, object>>(respString);
-                    date = jsonResponse["start_time"].ToString();
-                    DateTime dateTime = DateTime.Parse(start, CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal);
-                    string newFormat = dateTime.ToString("M/d/yyyy h:mm:ss tt");
+                    Console.WriteLine("The date you have entered is invalid, please only input dates that are in the future! Please try again!");
+                    Environment.Exit(0);
+                }
 
-                    if (date != newFormat)
-                    {
-                        Console.WriteLine("The date you have entered is invalid, please only input dates that are in the future! Please try again!");
-                        Environment.Exit(0);
-                    }
-
-                    jsonResponse = JsonConvert.DeserializeObject<Dictionary<string, object>>(respString);
-                    if(jsonResponse.ContainsKey("join_url"))
-                    {
-                        joinZoom = jsonResponse["join_url"].ToString();
-                        startZoom = jsonResponse["start_url"].ToString();
-                    }
-                    else
-                    {
-                        Console.WriteLine("The 'join_url' was not found in the response");
-                    }
-
-                    
+                jsonResponse = JsonConvert.DeserializeObject<Dictionary<string, object>>(respString);
+                if (jsonResponse.ContainsKey("join_url"))
+                {
+                    joinZoom = jsonResponse["join_url"].ToString();
+                    startZoom = jsonResponse["start_url"].ToString();
                 }
                 else
                 {
-                    Console.WriteLine($"Request failed with status code: {response.StatusCode}");
+                    Console.WriteLine("The 'join_url' was not found in the response");
                 }
-
             }
-            catch (Exception e)
+            else
             {
-                Console.WriteLine("Error while posting meetings: " + e);
+                Console.WriteLine($"Request failed with status code: {response.StatusCode}");
             }
         }
-
         return Tuple.Create(joinZoom, startZoom);
     }
 
@@ -183,7 +173,7 @@ public class Program
 
             HttpResponseMessage response = await client.SendAsync(refreshRequest);
 
-            if(response.IsSuccessStatusCode)
+            if (response.IsSuccessStatusCode)
             {
                 var jsonResponse = await response.Content.ReadAsStringAsync();
                 var tokenResponse = JsonConvert.DeserializeObject<TokenResponse>(jsonResponse);
@@ -194,16 +184,16 @@ public class Program
                 throw new Exception("Failed to refresh token");
             }
         }
-  
+
     }
 }
 
 
 public class TokenResponse
-{ 
+{
     public string access_token { get; set; }
-    public string refresh_token { get; set;}
-    public string token_type { get; set;}
+    public string refresh_token { get; set; }
+    public string token_type { get; set; }
     public string expires_in { get; set; }
     public string scope { get; set; }
 
