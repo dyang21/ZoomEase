@@ -7,7 +7,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
-
+namespace zoomcs;
 public class Program
 {
     static readonly HttpClient client = new HttpClient();
@@ -35,20 +35,17 @@ public class Program
 
         if (meetingPassword.Length > 10)
         {
-            Console.Write("Password cannot have more than 10 characters, please try again!");
-            Environment.Exit(0);
+            throw new Exception("Password cannot have more than 10 characters, please try again!");
         }
 
         string pattern = @"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z";
 
         if (!Regex.IsMatch(meetingStart, pattern))
         {
-            Console.WriteLine("Invalid format of start time please use this format (YYYY-MM-DDTHH:MM:SSZ)");
-            Environment.Exit(0);
+            throw new Exception("Invalid format of start time please use this format (YYYY-MM-DDTHH:MM:SSZ)");
         }
 
         testRefToken = await RefreshAccessTokenAsync(refToken, cID, cSecret);
-        await GetMeetings(testRefToken);
         Tuple<string, string> testResult = await PostMeetings(testRefToken, meetingTopic, meetingPassword, meetingStart, meetingDuration);
 
         string joinURL = testResult.Item1;
@@ -59,42 +56,9 @@ public class Program
 
     }
 
-    static async Task<string> GetMeetings(string refToken)
+    public static async Task<Tuple<string, string>> PostMeetings(string token, string top, string pass, string start, int dur)
     {
-        string accessToken = refToken;
-
-        string responseString = string.Empty;
-
-        using (var client = new HttpClient())
-        {
-            HttpRequestMessage request = new HttpRequestMessage();
-            request.RequestUri = new Uri("https://api.zoom.us/v2/users/me/meetings");
-            request.Method = HttpMethod.Get;
-            request.Headers.Add("Authorization", $"Bearer {accessToken}");
-
-            try
-            {
-                HttpResponseMessage response = await client.SendAsync(request);
-                responseString = response.Content.ReadAsStringAsync().Result;
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine("Error while getting meetings: " + e);
-            }
-        }
-        return responseString;
-    }
-
-
-    static async Task<Tuple<string, string>> PostMeetings(string token, string top, string pass, string start, int dur)
-    {
-
-
         string accessToken = token;
-        string respString = string.Empty;
-        var joinZoom = string.Empty;
-        var startZoom = string.Empty;
-        var date = string.Empty;
 
         using (var client = new HttpClient())
         {
@@ -103,55 +67,56 @@ public class Program
             request.Method = HttpMethod.Post;
             request.Headers.Add("Authorization", $"Bearer {accessToken}");
 
-         
-                var meetings = new
-                {
-                    topic = top,
-                    type = 2,
-                    start_time = start,
-                    duration = dur,
-                    timezone = "UTC",
-                    password = pass
-                };
-                string jsonString = JsonConvert.SerializeObject(meetings);
-                request.Content = new StringContent(jsonString, Encoding.UTF8, "application/json");
+            var meetings = new
+            {
+                topic = top,
+                type = 2,
+                start_time = start,
+                duration = dur,
+                timezone = "UTC",
+                password = pass
+            };
 
-                HttpResponseMessage response = await client.SendAsync(request);
-                respString = await response.Content.ReadAsStringAsync();
+            string jsonString = JsonConvert.SerializeObject(meetings);
+            request.Content = new StringContent(jsonString, Encoding.UTF8, "application/json");
+
+            HttpResponseMessage response = await client.SendAsync(request);
+            string respString = await response.Content.ReadAsStringAsync();
 
             if (response.IsSuccessStatusCode)
             {
                 var jsonResponse = JsonConvert.DeserializeObject<Dictionary<string, object>>(respString);
-                date = jsonResponse["start_time"].ToString();
+                var date = jsonResponse["start_time"].ToString();
                 DateTime dateTime = DateTime.Parse(start, CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal);
                 string newFormat = dateTime.ToString("M/d/yyyy h:mm:ss tt");
 
                 if (date != newFormat)
                 {
-                    Console.WriteLine("The date you have entered is invalid, please only input dates that are in the future! Please try again!");
-                    Environment.Exit(0);
+                    throw new Exception("The date you have entered is invalid, please only input dates that are in the future! Please try again!");
                 }
 
                 jsonResponse = JsonConvert.DeserializeObject<Dictionary<string, object>>(respString);
                 if (jsonResponse.ContainsKey("join_url"))
                 {
-                    joinZoom = jsonResponse["join_url"].ToString();
-                    startZoom = jsonResponse["start_url"].ToString();
+                    var joinZoom = jsonResponse["join_url"].ToString();
+                    var startZoom = jsonResponse["start_url"].ToString();
+                    return Tuple.Create(joinZoom, startZoom);
                 }
                 else
                 {
-                    Console.WriteLine("The 'join_url' was not found in the response");
+                    // Throw exception & terminate
+                    throw new Exception("The 'join_url' was not found in the response");
                 }
             }
             else
             {
-                Console.WriteLine($"Request failed with status code: {response.StatusCode}");
+                // throw an exception
+                throw new Exception($"Request failed with status code: {response.StatusCode}");
             }
         }
-        return Tuple.Create(joinZoom, startZoom);
     }
 
-    static async Task<string> RefreshAccessTokenAsync(string refreshToken, string clientId, string clientSecret)
+    public static async Task<string> RefreshAccessTokenAsync(string refreshToken, string clientId, string clientSecret)
     {
         using (var client = new HttpClient())
         {
