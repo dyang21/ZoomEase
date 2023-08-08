@@ -88,7 +88,8 @@ Scalability:
 
 Deployment:
 ---------------
-- https://drive.google.com/drive/folders/1ET-TdrAHsa9HFgBktCCaTGDdBJcMLkCO?usp=sharing
+- https://drive.google.com/drive/folders/1ET-TdrAHsa9HFgBktCCaTGDdBJcMLkCO?usp=sharing (.exe)
+- https://drive.google.com/file/d/1hVJ6wAqTbPgKUXap0-Y-OdWuEtMTkLcn/view?usp=sharing (Entire solution folder)
 
 Note:
 -----
