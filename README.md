@@ -73,7 +73,7 @@ Scalability:
 
 Deployment:
 ---------------
-- Comand-line tool
+- https://drive.google.com/drive/folders/1ET-TdrAHsa9HFgBktCCaTGDdBJcMLkCO?usp=sharing
 
 Note:
 -----
