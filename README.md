@@ -51,6 +51,12 @@ Usage:
 5. Provide the meeting duration in minutes.
 6. If all details are valid, the program will return the Join and Start URLs for the created Zoom meeting.
 
+Testing:
+---------------
+1. In visual studio code click on ZoomEaseTest
+2. On the top left bar, click on test
+3. Click on run all test
+
 Validations:
 ------------
 - The password length is checked to ensure it doesn't exceed 10 characters.
