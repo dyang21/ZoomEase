@@ -51,6 +51,15 @@ Usage:
 5. Provide the meeting duration in minutes.
 6. If all details are valid, the program will return the Join and Start URLs for the created Zoom meeting.
 
+Setup Testing:
+---------------
+1. In visual studio code click on Solution
+2. On the top left bar, click on File -> Add -> New Project
+3. Create a new MSTest Test Project
+4. Click on the new MSTEST Test Project on the right side
+5. On the top left bar, click on Project -> Add Project Reference -> Check the zoomcs box
+6. Copy and paste the code in the repo from the Test file and then follow the steps for testing
+
 Testing:
 ---------------
 1. In visual studio code click on ZoomEaseTest
